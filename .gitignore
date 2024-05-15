@@ -3,3 +3,6 @@
 
 # VScode
 .vscode/
+
+# Pycache
+__pycache__/
