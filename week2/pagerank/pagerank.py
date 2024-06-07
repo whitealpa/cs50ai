@@ -57,26 +57,15 @@ def transition_model(corpus, page, damping_factor):
     linked to by `page`. With probability `1 - damping_factor`, choose
     a link at random chosen from all pages in the corpus.
     """
-    
-    probability_distribution = dict()
-    number_of_pages_in_current_page = len(corpus[page])
-    
-    if number_of_pages_in_current_page == 0:
-        probability_distribution = equally_distribute(corpus)
+    if len(corpus[page]) == 0:
+        return equally_distribute(corpus)
     else:
-        probability_distribution = weighted_distribute(corpus, page, damping_factor)
-
-    return probability_distribution
+        return weighted_distribute(corpus, page, damping_factor)
 
 
 def equally_distribute(corpus):
-    probability_distribution = dict()
     equally_distributed = 1 / len(corpus)
-    
-    for each_page in corpus:
-        probability_distribution[each_page] = equally_distributed
-        
-    return probability_distribution
+    return {page: equally_distributed for page in corpus}
     
 
 def weighted_distribute(corpus, page, damping_factor):
@@ -85,11 +74,9 @@ def weighted_distribute(corpus, page, damping_factor):
     probability_of_any_page = (1 - damping_factor) / len(corpus)
     
     for each_page in corpus:
+        probability_distribution[each_page] = probability_of_any_page
         if each_page in corpus[page]:
-            probability_distribution[each_page] = probability_of_any_page + probability_of_page_in_current_page
-        else:
-            probability_distribution[each_page] = probability_of_any_page
-            
+            probability_distribution[each_page] += probability_of_page_in_current_page
     return probability_distribution
 
 
@@ -102,33 +89,22 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    
-    probability_distribution = dict()
-    next_page = None
+
+    pagerank = dict()
+    start_page = random.choice(list(corpus))
     
     for _ in range(n):
-        if len(probability_distribution) == 0:
-            start_page = random.choice(list(corpus))
-            new_sample = transition_model(corpus, start_page, damping_factor)
-            next_page = random.choices(list(new_sample.keys()), list(new_sample.values()))   
-            for page, probability in new_sample.items():
-                probability_distribution[page] = probability       
-        else:
-            new_sample = transition_model(corpus, next_page[0], damping_factor)
-            next_page = random.choices(list(new_sample.keys()), list(new_sample.values())) 
-        
+        new_sample = transition_model(corpus, start_page if len(pagerank) == 0 else next_page, damping_factor)
+        next_page = random.choices(list(new_sample.keys()), list(new_sample.values()))[0]
         for page, probability in new_sample.items():
-            probability_distribution[page] += probability
-    
-    probability_distribution = probability_average(probability_distribution, n)
-    
-    return probability_distribution
+            pagerank[page] = probability + pagerank.setdefault(page, 0)
+            
+    return probability_average(pagerank, n)
 
 
 def probability_average(distribution, n):
     for page, probability in distribution.items():
         distribution[page] = probability / n
-        
     return distribution
     
 
@@ -141,7 +117,49 @@ def iterate_pagerank(corpus, damping_factor):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    
+    total_number_of_pages = len(corpus)
+    start_probability = 1 / total_number_of_pages
+    random_probablity = (1 - damping_factor) / total_number_of_pages
+    
+    pagerank = {page: start_probability for page in corpus}
+    previous_pagerank = {page: 0 for page in corpus}    
+    value_converged = False
+    
+    while not value_converged:
+        for page in corpus:
+            pagerank[page] = random_probablity + damping_factor * sum_of_incoming_pages_probability(page, pagerank, corpus)   
+        value_converged = is_value_converged(previous_pagerank, pagerank)
+        previous_pagerank = {page: probability for page, probability in pagerank.items()}    
+                
+    return pagerank
+
+
+def is_value_converged(previous_pagerank, pagerank):
+    threshold = 0.0001
+    converged = 0
+    all_pages = len(pagerank)
+    
+    for page in pagerank:
+        different = abs(pagerank[page] - previous_pagerank[page])
+        if different < threshold:
+            converged += 1
+    return True if all_pages == converged else False
+            
+            
+def sum_of_incoming_pages_probability(page, pagerank, corpus):
+    sum = 0
+    
+    for link in corpus:
+        probability_of_incoming_page = pagerank[link]
+        number_of_links_in_incoming_page = len(corpus[link])
+        
+        if number_of_links_in_incoming_page == 0:
+            sum += probability_of_incoming_page / len(pagerank)  
+        elif page in corpus[link]:         
+            sum += probability_of_incoming_page / number_of_links_in_incoming_page
+    
+    return sum
 
 
 if __name__ == "__main__":
