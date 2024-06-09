@@ -166,34 +166,6 @@ def joint_probability(people, one_gene, two_genes, have_trait):
             probability *= PROBS["trait"][number_of_genes][person in have_trait]
             total_probability *= probability
 
-    """for person in one_gene:
-        has_parent = people[person]["mother"]
-        
-        if has_parent:
-            not_from_mother = probability_not_from("mother", people, person, genes)
-            not_from_father = probability_not_from("father", people, person, genes)
-            from_mother = probability_from("mother", people, person, genes)
-            from_father = probability_from("father", people, person, genes)
-            probability = (not_from_mother * from_father) + (from_mother * not_from_father)
-        elif not has_parent:
-            probability = PROBS["gene"][1]
-            
-        probability *= PROBS["trait"][1][person in have_trait]
-        total_probability *= probability
-
-    for person in two_genes:
-        has_parent = people[person]["mother"]
-        
-        if has_parent:
-            from_mother = probability_from("mother", people, person, genes)
-            from_father = probability_from("father", people, person, genes) 
-            probability = from_mother * from_father
-        elif not has_parent:
-            probability = PROBS["gene"][2]
-    
-        probability *= PROBS["trait"][2][person in have_trait]
-        total_probability *= probability"""
-
     return total_probability
 
 
