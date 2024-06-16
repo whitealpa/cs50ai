@@ -5,6 +5,7 @@ import sys
 
 DAMPING = 0.85
 SAMPLES = 10000
+THRESHOLD = 0.0001
 
 
 def main():
@@ -136,13 +137,12 @@ def iterate_pagerank(corpus, damping_factor):
 
 
 def is_value_converged(previous_pagerank, pagerank):
-    threshold = 0.0001
     converged = 0
     all_pages = len(pagerank)
     
     for page in pagerank:
         different = abs(pagerank[page] - previous_pagerank[page])
-        if different < threshold:
+        if different < THRESHOLD:
             converged += 1
     return True if all_pages == converged else False
             
@@ -153,9 +153,10 @@ def sum_of_incoming_pages_probability(page, pagerank, corpus):
     for link in corpus:
         probability_of_incoming_page = pagerank[link]
         number_of_links_in_incoming_page = len(corpus[link])
+        number_of_all_pages = len(pagerank)
         
         if number_of_links_in_incoming_page == 0:
-            sum += probability_of_incoming_page / len(pagerank)  
+            sum += probability_of_incoming_page / number_of_all_pages
         elif page in corpus[link]:         
             sum += probability_of_incoming_page / number_of_links_in_incoming_page
     
