@@ -59,40 +59,31 @@ def load_data(filename):
     labels should be the corresponding list of labels, where each label
     is 1 if Revenue is true, and 0 otherwise.
     """
-
     with open(filename, newline='') as f:
         shopping_data = csv.reader(f) 
         shopping_data = list(shopping_data)
     
     labels = get_labels_list(shopping_data)
     evidence = clean_evidence_data(shopping_data)
-    
-    print()
-    print("clean up data")
-    print("evidence:")
-    print(evidence)
-    print("labels:")
-    print(labels)
-    
     return (evidence, labels)
+
 
 def get_labels_list(shopping_data):
     exclude_header = slice(1, None)
     label_index = -1
     return [1 if data[label_index] == 'TRUE'
-              else 0 for data in shopping_data[exclude_header]]
+            else 0 for data in shopping_data[exclude_header]]
+
 
 def clean_evidence_data(shopping_data):
     evidence_data = exclude_label_and_header(shopping_data)
     data_types = get_data_types(shopping_data)
-    int_types = get_int_types()
-    float_types = get_float_types()
-
+    
     for data in evidence_data:
         for i in range(len(data_types)):
-            if data_types[i] in int_types:
+            if data_types[i] in get_int_types():
                 data[i] = int(data[i])
-            elif data_types[i] in float_types:
+            elif data_types[i] in get_float_types():
                 data[i] = float(data[i])
             elif data_types[i] == 'VisitorType':
                 data[i] = 1 if data[i] == 'Returning_Visitor' else 0
@@ -100,17 +91,21 @@ def clean_evidence_data(shopping_data):
                 data[i] = 1 if data[i] == 'TRUE' else 0
             elif data_types[i] == 'Month':
                 data[i] = convert_month_to_int(data[i])
+    
     return evidence_data           
+
 
 def exclude_label_and_header(shopping_data):
     exclude_header = slice(1, None)
     exclude_label = slice(None, -1)
     return [data[exclude_label] for data in shopping_data[exclude_header]]
 
+
 def get_data_types(shopping_data):
     header = 0
     exclude_label = slice(None, -1)
     return shopping_data[header][exclude_label]
+
 
 def get_int_types():
     return {
@@ -121,7 +116,8 @@ def get_int_types():
         "Browser", 
         "Region", 
         "TrafficType"
-        }
+    }
+    
     
 def get_float_types():
     return {
@@ -132,7 +128,8 @@ def get_float_types():
         "ExitRates", 
         "PageValues", 
         "SpecialDay"
-        }
+    }
+    
     
 def convert_month_to_int(month):
     month_int_map = {
@@ -153,12 +150,15 @@ def convert_month_to_int(month):
     month = month[first_three_letters].lower()
     return month_int_map[month]
 
+
 def train_model(evidence, labels):
     """
     Given a list of evidence lists and a list of labels, return a
     fitted k-nearest neighbor model (k=1) trained on the data.
     """
-    raise NotImplementedError
+    neighbors = KNeighborsClassifier(n_neighbors=1)
+    neighbors.fit(evidence, labels)
+    return neighbors
 
 
 def evaluate(labels, predictions):
@@ -176,7 +176,22 @@ def evaluate(labels, predictions):
     representing the "true negative rate": the proportion of
     actual negative labels that were accurately identified.
     """
-    raise NotImplementedError
+    actual_positive = labels.count(1)
+    actual_negative = labels.count(0)
+    predict_positive = 0
+    predict_negative = 0
+    
+    for i in range(len(labels)):
+        if labels[i] == predictions[i]:
+            if predictions[i] == 1:
+                predict_positive += 1
+            elif predictions[i] == 0:
+                predict_negative += 1
+                
+    sensitivity = predict_positive / actual_positive
+    specificity = predict_negative / actual_negative
+    
+    return (sensitivity, specificity)
 
 
 if __name__ == "__main__":
