@@ -123,7 +123,8 @@ class NimAI():
         """
         old_value_estimate = old_q
         new_value_estimate = reward + future_rewards
-        self.q[tuple(state), action] = old_value_estimate + self.alpha * (new_value_estimate - old_value_estimate)
+        self.q[tuple(state), action] = old_value_estimate + self.alpha * \
+            (new_value_estimate - old_value_estimate)
 
     def best_future_reward(self, state):
         """
@@ -162,7 +163,30 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        raise NotImplementedError
+        if epsilon is False:
+            return self.choose_best_action(state)
+        return self.epsilon_greedy_algorithm(state)
+    
+    def choose_best_action(self, state):
+        possible_actions = [action for (_, action) in self.q]
+        best_action = ()
+        maximum_value = 0
+        for action in possible_actions:
+            if self.q[tuple(state), action] > maximum_value:
+                maximum_value = self.q[tuple(state), action]
+                best_action = action
+        return best_action        
+    
+    def epsilon_greedy_algorithm(self, state):
+        if self.epsilon > random.random():
+            return self.choose_random_action() 
+        return self.choose_best_action(state) 
+                
+    def choose_random_action(self):
+        possible_actions = [action for (_, action) in self.q]
+        random_index = random.randint(0, len(possible_actions) - 1)
+        random_action = possible_actions[random_index]
+        return random_action
 
 
 def train(n):
