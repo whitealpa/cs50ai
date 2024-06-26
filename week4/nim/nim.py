@@ -163,9 +163,8 @@ class NimAI():
         If multiple actions have the same Q-value, any of those
         options is an acceptable return value.
         """
-        if epsilon is False:
-            return self.choose_best_action(state)
-        return self.epsilon_greedy_algorithm(state)
+        return self.epsilon_greedy_algorithm(state) if epsilon \
+            else self.choose_best_action(state)
     
     def choose_best_action(self, state):
         possible_actions = [action for (_, action) in self.q]
@@ -178,9 +177,8 @@ class NimAI():
         return best_action        
     
     def epsilon_greedy_algorithm(self, state):
-        if self.epsilon > random.random():
-            return self.choose_random_action() 
-        return self.choose_best_action(state) 
+        return self.choose_random_action() if self.epsilon > random.random() \
+            else self.choose_best_action(state) 
                 
     def choose_random_action(self):
         possible_actions = [action for (_, action) in self.q]
