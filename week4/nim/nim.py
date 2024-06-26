@@ -136,17 +136,17 @@ class NimAI():
         Q-value in `self.q`. If there are no available actions in
         `state`, return 0.
         """
-        possible_actions = [action for (_, action) in self.q]
         maximum_value = 0
-        
-        for action in possible_actions:
+        for action in self.possible_actions():
             try:
                 if self.q[tuple(state), action] > maximum_value:
                     maximum_value = self.q[tuple(state), action]
             except KeyError:
                 return 0
-            
         return maximum_value
+    
+    def possible_actions(self):
+        return [action for (_, action) in self.q]
         
     def choose_action(self, state, epsilon=True):
         """
@@ -167,10 +167,9 @@ class NimAI():
             else self.choose_best_action(state)
     
     def choose_best_action(self, state):
-        possible_actions = [action for (_, action) in self.q]
         best_action = ()
         maximum_value = 0
-        for action in possible_actions:
+        for action in self.possible_actions():
             if self.q[tuple(state), action] > maximum_value:
                 maximum_value = self.q[tuple(state), action]
                 best_action = action
@@ -181,9 +180,9 @@ class NimAI():
             else self.choose_best_action(state) 
                 
     def choose_random_action(self):
-        possible_actions = [action for (_, action) in self.q]
-        random_index = random.randint(0, len(possible_actions) - 1)
-        random_action = possible_actions[random_index]
+        actions = self.possible_actions()
+        random_index = random.randint(0, len(actions) - 1)
+        random_action = actions[random_index]
         return random_action
 
 
