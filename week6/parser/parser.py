@@ -66,8 +66,7 @@ def preprocess(sentence):
     and removing any word that does not contain at least one alphabetic
     character.
     """
-    sentence = sentence.lower()
-    sentence = nltk.word_tokenize(sentence)
+    sentence = nltk.word_tokenize(sentence.lower())
     
     for token in sentence:
         for character in token:
